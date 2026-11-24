@@ -1,0 +1,10 @@
+include=[
+        "app.karyawan.base",
+        "app.karyawan.marwan_perintah",
+        "app.karyawan.agim_perekap",
+        "app.karyawan.noval_factcheck",
+        "app.karyawan.khotib_penulis",
+        "app.karyawan.dede_sutradara",
+        "app.karyawan.marno_suara",
+        "app.karyawan.kadir_editor",
+    ],

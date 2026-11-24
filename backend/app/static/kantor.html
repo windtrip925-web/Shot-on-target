@@ -1,0 +1,325 @@
+
+cat > backend/app/static/kantor.html <<'EOF'
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kantor Shot on Target</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:#f3efe6;color:#2b2b2b}
+header{background:#14532d;color:white;padding:16px}
+header h1{margin:0;font-size:20px}
+.kotak,.video-card{background:white;border:1px solid #ddd2bd;border-radius:14px;padding:14px;margin:12px}
+.lantai{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.meja{background:white;border:1px solid #ddd2bd;border-radius:14px;padding:12px;position:relative}
+.meja.sibuk{border:2px solid #f59e0b;background:#fffbeb}
+.meja.owner{grid-column:1/-1;background:#1f2937;color:white}
+.av{font-size:30px}
+.nama{font-weight:bold}
+.peran{font-size:12px;color:#777}
+.owner .peran{color:#cbd5e1}
+.badge{float:right;background:#e5e7eb;border-radius:20px;padding:2px 10px;color:#222}
+input,textarea{width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px;font-size:15px}
+button{background:#14532d;color:white;border:0;border-radius:8px;padding:11px 14px;margin:4px 3px 4px 0;font-size:14px;cursor:pointer}
+button.tolak{background:#991b1b}
+button.revisi{background:#a16207}
+button:disabled{opacity:.5}
+#info{padding:0 12px;color:#b45309;font-size:13px}
+video{display:block;width:100%;max-height:520px;border-radius:10px;background:#111;margin:10px 0}
+.thumb{width:100%;max-height:220px;object-fit:cover;border-radius:8px;margin-top:8px}
+.kecil{font-size:12px;color:#666}
+.status{font-size:13px;margin-top:6px}
+.video-card h3{margin:5px 0}
+label{display:block;font-size:13px;font-weight:600;margin-top:10px}
+.judul-bagian{margin-top:0}
+@media(max-width:480px){
+ .lantai{gap:7px;padding:8px}
+ .meja{padding:9px}
+ .av{font-size:25px}
+ button{padding:10px;font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🏢 Studio Shot on Target</h1>
+<small>Owner: kamu. Periksa dan putuskan setiap video sebelum publikasi.</small>
+</header>
+
+<div class="kotak">
+<b>🔑 Login Owner</b>
+<input id="pw" type="password" placeholder="Password owner">
+<button onclick="simpanPw()">Masuk kantor</button>
+<button onclick="keluar()" style="background:#555">Keluar</button>
+</div>
+
+<div id="info"></div>
+<div class="lantai" id="lantai"></div>
+
+<div class="kotak">
+<b>📣 Beri perintah kepada Marwan</b>
+<input id="teks" placeholder="Contoh: Gol ikonik Real Madrid">
+<label>Jumlah isu yang dicari</label>
+<input id="jml" type="number" value="5" min="1" max="10">
+<button onclick="kirim()">Kirim perintah</button>
+<div id="hasil" class="status"></div>
+</div>
+
+<div class="kotak">
+<h3 class="judul-bagian">👑 Ruang Keputusan Owner</h3>
+<p class="kecil">Tonton dan periksa video sebelum memilih keputusan.</p>
+<div id="antrean">Silakan login untuk memuat antrean.</div>
+</div>
+
+<div class="kotak" id="ringkas"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let pw=localStorage.getItem('pw')||'';
+$('pw').value=pw;
+
+const TIM=[
+ {n:'Marwan',p:'Pemburu Isu',e:'🕵️',t:null},
+ {n:'Agim',p:'Perekap Informasi',e:'📚',t:['baru']},
+ {n:'Noval',p:'Pengecek Fakta',e:'🔍',t:['direkap']},
+ {n:'Khotib',p:'Penulis Naskah',e:'✍️',t:['dicek']},
+ {n:'Dede',p:'Sutradara',e:'🎬',t:['ditulis']},
+ {n:'Marno',p:'Pengisi Suara',e:'🎙️',t:['disutradarai']},
+ {n:'Kadir',p:'Editor Video',e:'🎞️',t:['disuarakan']},
+ {n:'Syair',p:'Publisher',e:'🚀',t:['disetujui']},
+ {n:'Kamu (Owner)',p:'Pemeriksa dan Pengambil Keputusan',e:'👑',
+  t:['menunggu_persetujuan'],o:1}
+];
+
+function esc(v){
+ return String(v??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#39;'
+ }[c]));
+}
+
+async function api(u,m='GET'){
+ const r=await fetch(u,{
+  method:m,
+  headers:{'x-owner':pw}
+ });
+ if(!r.ok){
+  let pesan='HTTP '+r.status;
+  try{
+   const j=await r.json();
+   pesan=j.detail||pesan;
+  }catch(e){}
+  throw new Error(pesan);
+ }
+ return r.json();
+}
+
+function simpanPw(){
+ pw=$('pw').value.trim();
+ if(!pw){
+  $('info').textContent='Masukkan password Owner.';
+  return;
+ }
+ localStorage.setItem('pw',pw);
+ muat();
+}
+
+function keluar(){
+ pw='';
+ localStorage.removeItem('pw');
+ $('pw').value='';
+ $('lantai').innerHTML='';
+ $('ringkas').innerHTML='';
+ $('antrean').textContent='Silakan login untuk memuat antrean.';
+ $('info').textContent='Anda sudah keluar dari kantor.';
+}
+
+function meja(x,jml,teks){
+ return `<div class="meja ${jml>0?'sibuk':''} ${x.o?'owner':''}">
+  <span class="badge">${jml}</span>
+  <div class="av">${x.e}</div>
+  <div class="nama">${x.n}</div>
+  <div class="peran">${x.p}</div>
+  <div class="status">${teks}</div>
+ </div>`;
+}
+
+async function muat(){
+ if(!pw)return;
+ $('info').textContent='Memuat data kantor...';
+
+ try{
+  const b=await api('/api/beranda');
+  const pr=await api('/api/perintah');
+  const p={};
+
+  (b.per_tahap||[]).forEach(x=>{
+   p[x.tahap]=Number(x.jumlah);
+  });
+
+  $('lantai').innerHTML=TIM.map(x=>{
+   if(!x.t){
+    const jumlah=Array.isArray(pr)?pr.length:0;
+    return meja(x,jumlah,jumlah?'Memiliki '+jumlah+' perintah':'Siaga');
+   }
+   const j=x.t.reduce((a,k)=>a+(p[k]||0),0);
+   return meja(x,j,j?'Ada '+j+' pekerjaan':'Menunggu pekerjaan');
+  }).join('');
+
+  const ringkas=['baru','direkap','dicek','ditulis','disutradarai',
+   'disuarakan','menunggu_persetujuan','disetujui','dipublish','revisi',
+   'ditolak','error'];
+
+  $('ringkas').innerHTML='<b>📊 Ringkasan Produksi</b><br><br>'+
+   ringkas.map(k=>esc(k)+': '+(p[k]||0)).join(' · ');
+
+  $('info').textContent='';
+  await muatAntrean();
+
+ }catch(e){
+  $('info').textContent='Gagal memuat: '+e.message+
+   '. Periksa password Owner dan koneksi API.';
+ }
+}
+
+async function muatAntrean(){
+ const data=await api('/api/owner/antrean');
+
+ if(!Array.isArray(data)||!data.length){
+  $('antrean').innerHTML='<p>Belum ada video yang menunggu persetujuan.</p>';
+  return;
+ }
+
+ $('antrean').innerHTML=data.map(x=>{
+  return `<div class="video-card">
+   <h3>#${x.id} — ${esc(x.judul)}</h3>
+   <div class="status">Status: ${esc(x.tahap)}</div>
+
+   ${x.thumbnail_path
+    ? `<img id="thumb-${x.id}" class="thumb" alt="Thumbnail isu ${x.id}" src="/media/hasil/${x.id}/thumb.jpg">`
+    : ''}
+
+   ${x.video_path
+    ? `<video id="video-${x.id}" controls playsinline preload="metadata" src="/media/hasil/${x.id}/final.mp4">
+        Browser tidak mendukung pemutar video.
+       </video>`
+    : '<p>File video belum tercatat.</p>'}
+
+   ${x.subtitle_path
+    ? '<p class="kecil">Subtitle: tersedia</p>'
+    : ''}
+
+   <label>Catatan Owner</label>
+   <textarea id="catatan-${x.id}" rows="2"
+    placeholder="Catatan revisi atau alasan keputusan"></textarea>
+
+   <div>
+    <button onclick="putuskan(${x.id},'setujui')">✅ Setujui</button>
+    <button class="revisi" onclick="putuskan(${x.id},'revisi')">✏️ Revisi</button>
+    <button class="tolak" onclick="putuskan(${x.id},'tolak')">❌ Tolak</button>
+   </div>
+
+   <div id="hasil-${x.id}" class="status"></div>
+  </div>`;
+ }).join('');
+
+}
+
+async function ambilMedia(id,nama,elemenId){
+ try{
+  const r=await fetch(
+   `/media/hasil/${id}/${nama}`,
+   {headers:{'x-owner':pw}}
+  );
+
+  if(!r.ok){
+   throw new Error('HTTP '+r.status);
+  }
+
+  const blob=await r.blob();
+  const el=$(elemenId);
+
+  if(el){
+   if(el.dataset.url){
+    URL.revokeObjectURL(el.dataset.url);
+   }
+
+   el.dataset.url=URL.createObjectURL(blob);
+   el.src=el.dataset.url;
+  }
+ }catch(e){
+  console.error('Gagal memuat media:',id,nama,e);
+  const el=$(elemenId);
+  if(el){
+   el.insertAdjacentText('afterend',' Gagal memuat media: '+e.message);
+  }
+ }
+}
+
+async function putuskan(id,keputusan){
+ const catatan=$('catatan-'+id).value;
+ const nama={
+  setujui:'Setujui',
+  revisi:'Revisi',
+  tolak:'Tolak'
+ };
+
+ if(!confirm(nama[keputusan]+' konten #'+id+'?'))return;
+
+ const hasil=$('hasil-'+id);
+ hasil.textContent='Menyimpan keputusan...';
+
+ try{
+  const q=new URLSearchParams({keputusan,catatan});
+  const r=await api('/api/isu/'+id+'/keputusan?'+q.toString(),'POST');
+
+  hasil.textContent='✅ Keputusan tersimpan: '+(r.keputusan||nama[keputusan]);
+  await muat();
+
+ }catch(e){
+  hasil.textContent='❌ Gagal: '+e.message;
+ }
+}
+
+async function kirim(){
+ const teks=$('teks').value.trim();
+ const jumlah=Number($('jml').value);
+
+ if(!teks){
+  $('hasil').textContent='Isi perintah terlebih dahulu.';
+  return;
+ }
+ if(!Number.isInteger(jumlah)||jumlah<1||jumlah>10){
+  $('hasil').textContent='Jumlah harus antara 1 sampai 10.';
+  return;
+ }
+
+ $('hasil').textContent='Mengirim perintah kepada Marwan...';
+
+ const u='/api/perintah?teks='+encodeURIComponent(teks)+
+  '&jumlah='+jumlah;
+
+ try{
+  const r=await api(u,'POST');
+  $('hasil').textContent='✅ Perintah #'+r.perintah_id+' dikirim kepada Marwan.';
+  $('teks').value='';
+  await muat();
+ }catch(e){
+  $('hasil').textContent='❌ Gagal: '+e.message;
+ }
+}
+if(pw){
+ muat();
+}
+</script>
+</body>
+</html>
+EOF
+
+docker compose up -d --build api

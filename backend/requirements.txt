@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+celery[redis]
+redis
+pydantic-settings
+holidays
+feedparser
+httpx
+anthropic
+tzdata
+edge-tts>=7.0.0

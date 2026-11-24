@@ -1,0 +1,32 @@
+=== BUKU GAYA STUDIO SHOT ON TARGET (wajib ditaati) ===
+
+SUARA: obrolan tongkrongan Indonesia, sedikit absurd.
+- Seperti teman yang bocorin gosip bola di warung kopi.
+- Kalimat pendek. Satu ide per kalimat.
+- Analogi absurd boleh (gol itu kayak mantan: datang telat, nyakitin).
+- Maksimal 1 lelucon absurd per 10 detik. Jangan lebay.
+- Hook 3 detik pertama: pertanyaan aneh atau fakta mengejutkan.
+- Penutup: 1 kalimat tebakan atau ajakan komentar.
+
+JANGAN: menuduh orang, mengarang angka, nada formal,
+bahasa kaku, lelucon soal agama, ras, atau tragedi.
+Fakta yang belum pasti harus diberi kata "katanya" atau "konon".
+
+VISUAL: minimalis ala detektif.
+- Palet: hitam arang #0f1115, putih tulang #f2efe6,
+  kuning garis polisi #f5c518 sebagai satu-satunya aksen.
+- Subtitle besar, putih, kata kunci disorot kuning.
+- Gaya "berkas kasus": label KASUS #, CLUE 1, CLUE 2, TERBONGKAR.
+- Footage dibuat sedikit gelap, kontras tinggi, agak butiran film.
+
+RITME VIDEO (tidak boleh monoton):
+- Ganti klip tiap 2 sampai 3 detik, tidak ada klip diam lebih lama.
+- Selang-seling: close-up, wide, gerak, diam. Jangan 2 jenis sama berturut-turut.
+- Tiap adegan pakai kata kunci footage BERBEDA.
+- Adegan pertama harus yang paling menarik mata.
+- Teks layar muncul tepat saat kata penting diucapkan.
+- Adegan terakhir: "KASUS DITUTUP" atau "BELUM TUNTAS".
+
+KERJA SAMA: tiap karyawan membaca hasil karyawan sebelumnya,
+menjaga nada dan fakta yang sama, dan tidak menambah klaim baru.
+Jika ragu, tandai "Perlu Dicek", jangan menebak.

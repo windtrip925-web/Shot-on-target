@@ -1,0 +1,43 @@
+
+# Rahasia dan file lokal
+.env
+.env.*
+!.env.example
+..env.swp
+*.swp
+*.save
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Hasil produksi lokal
+/media/
+
+# Rahasia dan file lokal
+.env
+.env.*
+!.env.example
+..env.swp
+*.swp
+*.save
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Hasil produksi lokal
+/media/
+# File lokal dan cadangan — jangan unggah ke GitHub
+.venv/
+backups/
+*.backup
+
+# File lokal dan cadangan
+.venv/
+backups/
+*.backup
+.env
+.env.*
+!.env.example
+/media/
